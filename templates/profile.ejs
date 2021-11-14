@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Project 2 - Stephen O'Toole</title>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+            //First tab is active by default
+            $(document).ready(function () {
+                // Show the current tab, and add an "active" class to the button that opened the tab
+                document.getElementById("myImages").style.display = "block";
+                event.currentTarget.className += " active";
+            });
+
+            function tabActive(event, tabName) {
+                // Declare all variables
+                var i;
+                var tabContent;
+                var tabLinks;
+
+                // Get all elements with class="tabcontent" and hide them
+                tabContent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabContent.length; i++) {
+                    tabContent[i].style.display = "none";
+                }
+
+                // Get all elements with class="tablinks" and remove the class "active"
+                tabLinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tabLinks.length; i++) {
+                    tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+                }
+
+                // Show the current tab, and add an "active" class to the button that opened the tab
+                document.getElementById(tabName).style.display = "block";
+                event.currentTarget.className += " active";
+            }
+
+            function deleteComment(id) {
+                id = id.replace('comment', '');
+                $.ajax("http://localhost:8000/deleteComment",
+                        {
+                            contentType: "application/json",
+                            type: 'post',
+                            dataType: 'json',
+                            data: JSON.stringify({"id": id}),
+                            success: function (result) {
+                                console.log("ajax success!");
+                                if (result.deleted) {
+                                    var tableEntry = document.getElementsByClassName("comment" + id)[0];
+                                    console.log(tableEntry);
+                                    tableEntry.remove();
+                                }
+
+                            },
+                            error: function () {
+                                console.log('error');
+                            }
+                        });
+            }
+
+            function deleteImage(id) {
+                id = id.replace('image', '');
+                $.ajax("http://localhost:8000/deleteImage",
+                        {
+                            contentType: "application/json",
+                            type: 'post',
+                            dataType: 'json',
+                            data: JSON.stringify({"id": id}),
+                            success: function (result) {
+                                console.log("ajax success!");
+                                if (result.deleted) {
+                                    var tableEntry = document.getElementsByClassName("image" + id)[0];
+                                    tableEntry.remove();
+                                }
+
+                            },
+                            error: function () {
+                                console.log('error');
+                            }
+                        });
+
+            }
+
+        </script>
+    </head>
+    <body>
+        <!-- NAVIGATION BAR START -->
+        <%- include("navigation", {active: "Profile"}) %>
+        <!-- LOGIN BAR END-->
+
+        <!-- MAIN CONTENT START -->
+        <!-- LOGGED IN -->
+        <% if(sessionUsername) {%>
+        <div class = "container">
+
+
+            <div class = "container">
+                
+                <h1>Profile page for <%= sessionUsername %></h1>
+                <div class = "container">
+                    <h2>Upload a new image</h2>
+                    <form action="/upload">
+                        <input type="submit" value="Upload image" />
+                    </form>
+                    <br>
+                </div>
+                
+            </div>
+           
+
+
+            <!-- TAB MENU -->
+            <div class="tab">
+                <button class="tablinks" onclick="tabActive(event, 'myImages')">My Images</button>
+                <button class="tablinks" onclick="tabActive(event, 'myComments')">My Comments</button>
+            </div>
+
+            <!-- Tab content -->
+            <div id="myImages" class="tabcontent">
+                <!-- IMAGE TABLE START -->
+
+                <% if(pictures.length > 0) {%>
+                <table style="width:100%">
+                    <% for(var key in pictures) {%>
+
+                    <tr class="image<%= uploadedId[key]%>">
+                        <td>
+                            <h3><%= imageNames[key]%></h3>
+                        </td>
+                        <td>
+                            <a href="image/<%= uploadedId[key] %>"><img border="0" alt="image" src="<%= pictures[key]%>"  width="200" height="200"></a>
+                        </td>
+                        <td>
+                            <button id="image<%= uploadedId[key]%>" type="button" onclick="deleteImage(this.id)"><img src="images/remove.svg"></button>
+                        </td>
+                    </tr>
+
+                    <% } %>
+                </table>
+                <% } %>
+
+                <% if(pictures.length <= 0) {%>
+                <p>You have not uploaded any images.</p>
+                <% } %>
+                <!-- IMAGE TABLE END -->
+            </div>
+
+            <div id="myComments" class="tabcontent">
+                <% if(comments.length > 0) {%>
+                <table id="commentsTable" class="commentsTable" style="width:100%">
+                    <tr>
+                        <th scope="col">Image Name</th>
+                        <th scope="col">Comment</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                    <% for(var key in comments) {%>
+
+                    <tr class="comment<%= commentId[key]%>">
+                        <td>
+                            <h3><%= commentImage[key]%></h3>
+                        </td>
+                        <td>
+                            <p><%= comments[key]%></p>
+                        </td>
+                        <td>
+                            <button id="comment<%= commentId[key]%>" type="button" onclick="deleteComment(this.id)"><img src="images/remove.svg"></button>
+                        </td>
+                    </tr>
+
+                    <% } %>
+                </table>
+                <%}%>
+                <% if(comments.length <= 0) {%>
+                <p>You have not posted any comments.</p>
+                <% } %>
+            </div>
+            <% } %>
+        </div>
+
+
+        <!-- LOGGED OUT -->
+        <% if(!sessionUsername) {%>
+        <div class = "container">
+            <p> You must be logged in to view the profile page. You can log in at <a href="/login">this link</a></li></p>
+        </div>
+        <% } %>
+        <!-- MAIN CONTENT END -->
+
+    </body>
+</html>

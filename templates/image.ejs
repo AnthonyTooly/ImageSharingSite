@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Project 2 - Stephen O'Toole</title>
+        <link rel="stylesheet" type="text/css" href="../style.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+            function sendComment(obj) {
+                var text = $(obj).parent().children("input").val();
+                text = escape(text);
+                var parentElement = document.getElementById("commentsTable");
+
+                $.ajax("http://localhost:8000/comment",
+                        {
+                            contentType: "application/json",
+                            type: 'post',
+                            dataType: 'json',
+                            data: JSON.stringify({"text": text}),
+                            success: function (result) {
+                                //add table entry
+                                var htmlCode = '';
+                                htmlCode += "<tr>" +
+                                        "<td>" +
+                                        "<h3>" + result['username'] + "</h3>" +
+                                        " </td>" +
+                                        " <td>" +
+                                        " <p>" + result['comment'] + "</p>" +
+                                        "</td>" +
+                                        "</tr>";
+                                parentElement.innerHTML += htmlCode;    //Add new table row to Div element
+                                $(obj).parent().children("input").val('');  //Reset text field to null
+                            },
+                            error: function () {
+                                console.log('error');
+                            }
+                        }
+                );
+            }
+
+            function sendLike(obj) {
+                var imageId = window.location.pathname.split('/').pop(); //Get image id by splitting at last /
+                var parentElement = document.getElementById("totalLikes");  //Reference to totalLikes Div element
+                $.ajax("http://localhost:8000/like",
+                        {
+                            contentType: "application/json",
+                            type: 'post',
+                            dataType: 'json',
+                            data: JSON.stringify({"id": imageId}),
+                            success: function (result) {
+                                console.log("ajax success!");
+                                console.log(result['likes']);
+                                //add table entry
+                                var htmlCode = '';
+                                htmlCode = result['likes']; //Set the htmlCode equal to the new count of likes  
+                                canLike = result['canLike'];
+                                if (!canLike) {   //grey out button
+                                    likeButton.disabled = true; //Disable like button so user cannot like an image twice
+                                }
+                                parentElement.innerHTML = htmlCode; //Update inner HTML to new count
+                            },
+                            error: function () {
+                                console.log('error');
+                            }
+                        }
+                );
+            }
+
+            //Function to replace special characters
+            function escape(stringToEscape) {
+                if (stringToEscape == '') {
+                    return stringToEscape;
+                }
+
+                return stringToEscape
+                        .replace(/\\/g, "\\\\")
+                        .replace(/\'/g, "\\\'")
+                        .replace(/\"/g, "\\\"")
+                        .replace(/\n/g, "\\\n")
+                        .replace(/\r/g, "\\\r")
+                        .replace(/\x00/g, "\\\x00")
+                        .replace(/\x1a/g, "\\\x1a");
+            }
+
+        </script>
+    </head>
+    <body>
+        <!-- NAVIGATION BAR START -->
+        <%- include("navigation", {active: "Home"}) %>
+        <!-- LOGIN BAR END-->
+
+        <!-- MAIN CONTENT START -->
+        <div class = "container">
+            <h1>Title: <%=imageName%></h1>
+        </div>
+        <div class="container">
+            <img border="0" alt="image" src="<%= image%>"  width="400" height="400">
+            <br>
+            Uploaded by: <%=uploadedBy%>
+            <br>
+            Date: <%=uploadedDate%>
+            <br>
+
+            <% if(sessionUsername) {%>
+            <% if(canLike) {%>
+            <div class="likeContainer">
+                <button id="likeButton" type="button" onclick="sendLike(this)"><img src="../images/like.png">
+
+                </button> 
+            </div>
+            <div id="totalLikes"><%= likes %></div>
+            <% }%>
+            <% if(!canLike){%>
+            <div class="likeContainer">
+                <img id="likeImage" border="0" alt="likes" src="../images/like.png"> 
+            </div>
+            <div id="totalLikes"><%= likes %></div>
+            <% }%>
+            <% }%>
+            <% if(!sessionUsername) {%>
+            <div class="likeContainer">
+                <img id="likeImage" border="0" alt="likes" src="../images/like.png"> 
+            </div>       
+            <div id="totalLikes"><%= likes %></div>
+            <% }%>
+        </div>
+
+        <!--COMMENTS START -->
+        <div class = "container">
+
+            <table id="commentsTable" class="commentsTable" style="width:100%">
+                <tr>
+                    <th scope="col">Username</th>
+                    <th scope="col">Comment</th>
+                </tr>
+                <% for(var key in comments) {%>
+
+                <tr>
+                    <td>
+                        <h3><%= username[key]%></h3>
+                    </td>
+                    <td>
+                        <p><%= comments[key]%></p>
+                    </td>
+                </tr>
+
+                <% } %>
+            </table>
+
+        </div>
+        <!-- COMMENTS END -->
+
+        <!-- ENTER COMMENTS START-->
+        <div class = "container">
+            <% if(sessionUsername) {%>
+            <form method="post" enctype="multipart/form-data">
+                <label for="comment">Submit a Comment</label><br>
+                <input type="text" id="iname" name="comment" required><br>
+                <button type="button" onclick="sendComment(this)">Submit</button>
+            </form>
+            <%}%>
+        </div>
+        <!-- ENTER COMMENTS END-->
+
+        <!-- MAIN CONTENT END -->
+
+    </body>
+</html>
+

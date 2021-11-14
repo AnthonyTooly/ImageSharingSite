@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Project 2 - Stephen O'Toole</title>
+		<link rel="stylesheet" type="text/css" href="style.css"/>
+    </head>
+    <body>
+		<!-- NAVIGATION BAR START -->
+		<%- include("navigation", {active: ""}) %>
+		<!-- LOGIN BAR END-->
+
+		<!-- MAIN CONTENT START -->
+		<div class = "container">
+			<h1>Please select a file to upload</h1>
+		</div>
+		
+		<div class = "container">
+                        
+			<form action="/upload" method="post" enctype="multipart/form-data">
+				<input id="upload" type="file" name="myimage">
+                                <br>
+                                <br>
+                                <label for="iname">Image name:</label><br>
+                                <input type="text" id="iname" name="iname" required><br>
+				<input type="submit">
+			</form>
+		</div>
+		<!-- MAIN CONTENT END -->
+		
+    </body>
+</html>

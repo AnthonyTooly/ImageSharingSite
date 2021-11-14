@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>lab 15 - Stephen O'Toole</title>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var userErrorDiv = document.getElementById('loginuError');
+                var passErrorDiv = document.getElementById('loginpError');
+                userErrorDiv.style.display = "none";
+                passErrorDiv.style.display = "none";
+            });
+
+            function login() {
+
+                var username = document.getElementsByClassName('username')[0].value;
+                var password = document.getElementsByClassName('password')[0].value;
+                //error divs
+                var userErrorDiv = document.getElementById('loginuError');
+                var passErrorDiv = document.getElementById('loginpError');
+
+                //SQL injection check
+                username = escapeString(username);
+                password = escapeString(password);
+
+                $.ajax("http://localhost:8000/login",
+                        {
+                            contentType: "application/json",
+                            type: 'post',
+                            dataType: 'json',
+                            data: JSON.stringify({"username": username, "password": password}),
+                            success: function (result) {
+                                console.log("ajax success!");
+                                console.log(result);
+                                //check if the username was found
+                                if (result['correctUser'] == false) { //If username was not found
+                                    passErrorDiv.style.display = "none";
+                                    userErrorDiv.innerHTML = "<br>" + result['errorMessage'] + "<br>";
+                                    userErrorDiv.style.display = "inline";
+                                } else if ((result['correctUser']) == true) {   //If the username was found
+                                    userErrorDiv.style.display = "none";
+                                    passErrorDiv.innerHTML = "<br>" + result['errorMessage'] + ' <br>Hint: ' + result['passwordHint'] + "<br>";
+                                    passErrorDiv.style.display = "inline";
+                                }
+                                if (result['success'] == true) {
+                                    location.href = '/profile';//Go to login page
+                                }
+                            },
+                            error: function () {
+                                console.log('error');
+                            }
+                        }
+                );
+
+            }
+
+            //Function to replace special characters
+            function escapeString(stringToEscape) {
+                if (stringToEscape == '') {
+                    return stringToEscape;
+                }
+
+                return stringToEscape
+                        .replace(/\\/g, "\\\\")
+                        .replace(/\'/g, "\\\'")
+                        .replace(/\"/g, "\\\"")
+                        .replace(/\n/g, "\\\n")
+                        .replace(/\r/g, "\\\r")
+                        .replace(/\x00/g, "\\\x00")
+                        .replace(/\x1a/g, "\\\x1a");
+            }
+
+        </script>
+    </head>
+    <body>
+        <!-- NAVIGATION BAR START -->
+        <%- include("navigation", {active: "Login"}) %>
+        <!-- LOGIN BAR END-->
+
+        <!-- MAIN CONTENT START -->
+        <div class = "container">
+            <%if(!signup){%>
+            <h1>Please enter your login details below</h1>
+            <%}%>
+            <%if(signup){%>
+            <h1>User created successfully<br>
+                Please enter your login details below</h1>
+            <%}%>
+        </div>
+
+        <div class = "container">
+            <form method="post" enctype="multipart/form-data">
+                <div id="loginuError"></div>
+                <div id="loginpError"></div>
+                <label for="username"><b>Username</b></label>
+                <input class="username" type="text" placeholder="Enter Username" name="username" required>
+                </br>
+
+                <label for="password"><b>Password</b></label>
+                <input class="password" type="password" placeholder="Enter Password" name="password" required>
+
+                <button type="button" onclick="login(this)">login</button>
+            </form>		
+        </div>
+        <!-- MAIN CONTENT END -->
+
+    </body>
+</html>

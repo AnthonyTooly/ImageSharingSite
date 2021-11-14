@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Project 2 - Stephen O'Toole</title>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+    </head>
+    <body>
+        <!-- NAVIGATION BAR START -->
+        <%- include("navigation", {active: "Home"}) %>
+        <!-- LOGIN BAR END-->
+
+        <!-- MAIN CONTENT START -->
+        <div class = "container">
+            <h1>Welcome to the home page</h1>
+            <p> Click an image for more information.</p>
+            <% if(!sessionUsername) {%>
+            <p>You can log in using the login button in the navigation bar. This will allow you to like/comment and upload images.</p>
+            <%}%>
+        </div>
+        
+        <!-- TABLE START -->
+        <div class = "containertable brightness">
+            <% if(pictures.length > 0) {%>
+            <h2>Recent Uploads</h2>
+            <table style="width:100%">
+            <% for(var key in pictures) {%>
+            
+                <tr>
+                    <a href="image/<%= uploadedId[key] %>"><img border="0" alt="image" src="<%= pictures[key]%>"  width="200" height="200"></a>
+                </tr>
+            
+            <% } %>
+            </table>
+            <% } %>
+        </div>
+        <!-- TABLE END -->
+
+        <!-- MAIN CONTENT END -->
+
+    </body>
+</html>

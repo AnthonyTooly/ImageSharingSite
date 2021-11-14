@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Project 2 - Stephen O'Toole</title>
+        <link rel="stylesheet" type="text/css" href="../style.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+                // Hide the search table
+                document.getElementById("imagesTable").style.display = "none";
+            });
+
+            function searchData(term) {
+                var text = $(term).parent().children("input").val();
+                text = escape(text);
+                var notFound = document.getElementsByClassName('notFound')[0];
+                var parentElement = document.getElementById("imagesTable");
+                if (text.length <= 0) {
+                    notFound.visibility = "visible";
+                } else {
+                    notFound.visibility = "hidden";
+                    $.ajax("http://localhost:8000/searchData",
+                            {
+                                contentType: "application/json",
+                                type: 'post',
+                                dataType: 'json',
+                                data: JSON.stringify({"text": text}),
+                                success: function (result) {
+                                    console.log("ajax success!");
+                                    var found = result['found'];
+                                    if (result['result'] != null) {
+                                        var images = result['result'];
+                                        console.log(images);
+                                        var htmlCode = '';
+                                        //Build images table
+                                        for (var i = 0; i < images.length; i++) {
+                                            //add table entry
+                                            htmlCode += "<tr>" +
+                                                    "<td>" +
+                                                    "<h3>" + images[i]['imagename'] + "</h3>" +
+                                                    " </td>" +
+                                                    " <td>" +
+                                                    " <a href='../image/" + images[i]['idimages'] + "'><img border='0' alt='image' src= data:image/png;base64," + images[i]['imagedata'] + "  width='200' height='200'></a>" +
+                                                    "</td>" +
+                                                    "</tr>";
+                                            parentElement.innerHTML += htmlCode;
+                                            parentElement.style.display = "inline";
+                                            htmlCode = '';
+                                        }
+
+                                    }
+                                    if (!found) {
+                                        notFound.style.visibility = "visible";
+                                    }
+                                },
+                                error: function () {
+                                    console.log('error');
+                                }
+                            }
+                    );
+                }
+            }
+
+            //Function to replace special characters
+            function escape(stringToEscape) {
+                if (stringToEscape == '') {
+                    return stringToEscape;
+                }
+
+                return stringToEscape
+                        .replace(/\\/g, "\\\\")
+                        .replace(/\'/g, "\\\'")
+                        .replace(/\"/g, "\\\"")
+                        .replace(/\n/g, "\\\n")
+                        .replace(/\r/g, "\\\r")
+                        .replace(/\x00/g, "\\\x00")
+                        .replace(/\x1a/g, "\\\x1a");
+            }
+
+        </script>
+    </head>
+    <body>
+        <%- include("navigation", {active: "Search"}) %>
+        <!-- SEARCH BODY START-->
+        <div class= "container">
+            <h1>Please enter a search term below</h1>
+        </div>
+        <div class="container">
+            <form action="search">
+                <input type="text" placeholder="Search.." name="search">
+                <button type="button" onclick="searchData(this)">Submit</button>
+            </form>
+        </div>
+
+        <!-- SEARCH BODY END -->
+        <!-- RESULTS START -->
+
+        <div class="container brightness">
+
+            <table id="imagesTable">
+
+                <tr>
+                    <th>Name</th>
+                    <th>Image</th>
+                </tr>
+            </table>
+        </div>
+        <div class= "notFound container" style = "visibility: hidden">
+            We're sorry, we couldn't find this item for you. Please try another search term.
+
+        </div>
+
+        <div class= "noEntry container" style = "visibility: hidden">
+            Please provide a search term before clicking the submit button.
+
+        </div>
+
+
+        <!-- RESULT END -->
+    </body>
+</html>

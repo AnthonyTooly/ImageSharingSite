@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Project 2 - Stephen O'Toole</title>
+		<link rel="stylesheet" type="text/css" href="style.css"/>
+    </head>
+    <body>
+		<!-- NAVIGATION BAR START -->
+		<%- include("navigation", {active: ""}) %>
+		<!-- LOGIN BAR END-->
+
+		<!-- MAIN CONTENT START -->
+		<div class = "container">
+			<h1>There was a problem!</h1>
+		</div>
+		
+		<div class = "container">
+		<%if(errorType == "login"){%>
+			
+			<%if(correctUser){%>
+				<p>The login credentials provided do not match any on record. <br><br>
+				Hint: <b><%=passwordHint%></b></p>
+				<%}%>
+			<%if(!correctUser){%>
+				<p>The login credentials provided do not match any on record. Please click the login button and try again.</p>
+				<%}%>
+		<%}%>
+		<%if(errorType == "upload"){%>
+			<p>You did not select a file before submitting the upload button. <a href = "/profile">Click here</a> to return to the profile page.</p>
+		<%}%>
+		<%if(errorType == "signup"){%>
+			<p>We are sorry but this user already exists. Please try again to enter a unique username.</p>
+		<%}%>
+		</div>
+		<!-- MAIN CONTENT END -->
+		
+    </body>
+</html>

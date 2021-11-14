@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Project 2 - Stephen O'Toole</title>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+            //hide error class
+            $(document).ready(function () {
+                var userErrorDiv = document.getElementById('uError');
+                var passErrorDiv = document.getElementById('pError');
+                var success = document.getElementById('success');
+                userErrorDiv.style.display = "none";
+                passErrorDiv.style.display = "none";
+                success.style.display = "none";
+            });
+
+
+            function signup(obj) {
+                var username = document.getElementsByClassName('username')[0].value;
+                var password = document.getElementsByClassName('password')[0].value;
+                var firstName = document.getElementsByClassName('firstName')[0].value;
+                var lastName = document.getElementsByClassName('lastName')[0].value;
+                var passHint = document.getElementsByClassName('passHint')[0].value;
+
+                //error divs
+                var userErrorDiv = document.getElementById('uError');
+                userErrorDiv.style.display = "none";
+                var successDiv = document.getElementById('success');
+                successDiv.style.display = "none";
+
+                //SQL injection check
+                username = escapeString(username);
+                password = escapeString(password);
+                firstName = escapeString(firstName);
+                lastName = escapeString(lastName);
+                passHint = escapeString(passHint);
+
+                //AJAX
+                $.ajax("http://localhost:8000/signup",
+                        {
+                            contentType: "application/json",
+                            type: 'post',
+                            dataType: 'json',
+                            data: JSON.stringify({"username": username, "password": password, "firstName": firstName, "lastName": lastName, "passHint": passHint}),
+                            success: function (result) {
+                                console.log("ajax success!");
+                                //if error message is returned from the SQL
+                                if (result['errorMessage'].length > 0) {
+                                    userErrorDiv.innerHTML = "<br>" + result['errorMessage'];
+                                    userErrorDiv.style.display = "inline";
+                                }
+                                //Redirect to login
+                                if (result['successMessage'].length > 0) {
+                                    successDiv.style.display = result['successMessage'];
+                                    successDiv.style.display = "inline";
+                                    location.href = '/login';//Go to login page
+                                }
+                            },
+                            error: function () {
+                                console.log('error');
+                            }
+                        }
+                );
+            }
+
+
+            //Function to replace special characters
+            function escapeString(stringToEscape) {
+                if (stringToEscape == '') {
+                    return stringToEscape;
+                }
+
+                return stringToEscape
+                        .replace(/\\/g, "\\\\")
+                        .replace(/\'/g, "\\\'")
+                        .replace(/\"/g, "\\\"")
+                        .replace(/\n/g, "\\\n")
+                        .replace(/\r/g, "\\\r")
+                        .replace(/\x00/g, "\\\x00")
+                        .replace(/\x1a/g, "\\\x1a");
+            }
+
+
+        </script>
+    </head>
+    <body>
+        <!-- NAVIGATION BAR START -->
+        <%- include("navigation", {active: "Signup"}) %>
+        <!-- LOGIN BAR END-->
+
+        <!-- MAIN CONTENT START -->
+        <div class = "container">
+            <h1>Please enter your User details below</h1>
+        </div>
+
+        <div class = "container">
+            <form  method="post" enctype="multipart/form-data">
+                <label for="firstname"><b>First Name</b></label>
+                <input class="firstName" type="text" placeholder="Enter first name" name="firstname" required>
+                <br>        
+                <label for="lastname"><b>Last Name</b></label>
+                <input class="lastName" type="text" placeholder="Enter last name" name="lastname" required>
+                <br>
+                <label for="username"><b>Username</b></label>
+                <input class="username" type="text" placeholder="Enter Username" name="username" required>
+                <div id="uError"></div>
+                <br>
+                <label for="password"><b>Password</b></label>
+                <input class="password" type="password" placeholder="Enter Password" name="password" required>
+                <div id="pError"></div>
+                <br>
+                <label for="passHint"><b>Password Hint</b></label>
+                <input class="passHint" type="text" placeholder="Enter Hint" name="passHint" required>
+
+                <button type="button" onclick="signup(this)">Signup</button>
+            </form>
+            <br>
+            <div id="success">
+
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT END -->
+
+    </body>
+</html>

@@ -1,0 +1,17 @@
+<div class="nav">
+			<ul>
+				<li><a <%if(active=="Home"){%>class="active"<%}%> href="/">Home</a></li>
+                                <li><a <%if(active=="Images"){%>class="active"<%}%> href="/images">Images</a></li>
+                                <li><a <%if(active=="Search"){%>class="active"<%}%> href="/search">Search</a></li>
+				<% if(sessionUsername) {%>
+					<li><a <%if(active=="Logout"){%>class="active"<%}%> href="/logout">Logout</a></li>
+				<% } %>
+				<% if(!sessionUsername) {%>
+					<li><a <%if(active=="Login"){%>class="active"<%}%> href="/login">Login</a></li>
+					<li><a <%if(active=="Signup"){%>class="active"<%}%> href="/signup">Signup</a></li>
+				<% } %>
+                                <% if(sessionUsername) {%>
+                                    <li><a <%if(active=="Profile"){%>class="active"<%}%> href="/profile">Profile</a></li>
+                                <% } %>
+			</ul>
+</div>
